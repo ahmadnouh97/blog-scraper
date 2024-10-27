@@ -1,4 +1,4 @@
-package devto
+package scraper
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
-	"github.com/ahmadnouh97/blog-scraper/utils"
+	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
 
 type DevToData struct {

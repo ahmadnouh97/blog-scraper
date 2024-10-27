@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	devto "github.com/ahmadnouh97/blog-scraper/scraper"
-	"github.com/ahmadnouh97/blog-scraper/utils"
+	"github.com/ahmadnouh97/blog-scraper/internal/scraper"
+	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		"sort_direction": "desc",
 	}
 
-	docs, err := devto.FetchBlogs(params)
+	docs, err := scraper.FetchBlogs(params)
 
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
