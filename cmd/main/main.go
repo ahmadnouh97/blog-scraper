@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/ahmadnouh97/blog-scraper/internal"
 	"github.com/ahmadnouh97/blog-scraper/internal/blog"
@@ -40,10 +41,38 @@ func main() {
 	// Save blogs to database
 	for _, devToBlog := range devToBlogs {
 		newBlog := &blog.Blog{
-			ID:        devToBlog.ID,
-			Title:     devToBlog.Title,
-			Content:   devToBlog.Content,
-			CreatedAt: devToBlog.CreatedAt,
+			ID:                         devToBlog.ID,
+			Title:                      devToBlog.Title,
+			Content:                    devToBlog.Content,
+			Description:                devToBlog.Description,
+			CoverImage:                 devToBlog.CoverImage,
+			ReadablePublishDate:        devToBlog.ReadablePublishDate,
+			SocialImage:                devToBlog.SocialImage,
+			TagList:                    strings.Join(devToBlog.TagList, ","),
+			Tags:                       devToBlog.Tags,
+			Slug:                       devToBlog.Slug,
+			Path:                       devToBlog.Path,
+			URL:                        devToBlog.URL,
+			CanonicalURL:               devToBlog.CanonicalURL,
+			CommentsCount:              devToBlog.CommentsCount,
+			PositiveReactionsCount:     devToBlog.PositiveReactionsCount,
+			PublicReactionsCount:       devToBlog.PublicReactionsCount,
+			CreatedAt:                  devToBlog.CreatedAt,
+			EditedAt:                   devToBlog.EditedAt,
+			PublishedAt:                devToBlog.PublishedAt,
+			LastCommentAt:              devToBlog.LastCommentAt,
+			PublishedTimestamp:         devToBlog.PublishedTimestamp,
+			ReadingTimeMinutes:         devToBlog.ReadingTimeMinutes,
+			Username:                   devToBlog.User.Username,
+			UserFullName:               devToBlog.User.Name,
+			UserProfileImage:           devToBlog.User.ProfileImage,
+			UserProfileImage90:         devToBlog.User.ProfileImage90,
+			OrganizationName:           devToBlog.Organization.Name,
+			OrganizationUsername:       devToBlog.Organization.Username,
+			OrganizationProfileImage:   devToBlog.Organization.ProfileImage,
+			OrganizationProfileImage90: devToBlog.Organization.ProfileImage90,
+			OrganizationSlug:           devToBlog.Organization.Slug,
+			TypeOf:                     devToBlog.TypeOf,
 		}
 
 		if _, err := blogRepo.AddBlog(newBlog); err != nil {
