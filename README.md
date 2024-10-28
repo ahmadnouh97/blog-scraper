@@ -28,5 +28,5 @@ A simple Golang tool for scraping and storing blog posts. This tool extracts tit
 
 3. Run the scraper:
   ```bash
-  go run main.go
+  go run cmd/main/main.go
   ```
