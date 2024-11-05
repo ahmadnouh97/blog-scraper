@@ -2,16 +2,18 @@ package blog
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
+
+	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
 
 type Repository struct {
-	DB *sql.DB
+	DB     *sql.DB
+	logger *utils.CustomLogger
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	return &Repository{DB: db}
+	return &Repository{DB: db, logger: utils.NewCustomLogger()}
 }
 
 func (r *Repository) AddBlog(blog *Blog) (int64, error) {
@@ -25,7 +27,7 @@ func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 
 	// If the blog already exists, return an error or a suitable message
 	if exists {
-		fmt.Printf("Blog with ID %d already exists\n", blog.ID)
+		r.logger.Warning("Blog with ID %d already exists", blog.ID)
 		return 0, nil
 	}
 
