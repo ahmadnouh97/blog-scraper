@@ -2,6 +2,7 @@ package blog
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -14,7 +15,22 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) AddBlog(blog *Blog) (int64, error) {
-	query := `
+	// Check if the blog already exists by searching for the unique ID
+	var exists bool
+	checkQuery := `SELECT EXISTS(SELECT 1 FROM blogs WHERE id = ?)`
+	err := r.DB.QueryRow(checkQuery, blog.ID).Scan(&exists)
+	if err != nil {
+		return 0, err
+	}
+
+	// If the blog already exists, return an error or a suitable message
+	if exists {
+		fmt.Printf("Blog with ID %d already exists\n", blog.ID)
+		return 0, nil
+	}
+
+	// If the blog does not exist, proceed to insert it
+	insertQuery := `
 		INSERT INTO blogs (
 			id, title, content, description, cover_image, readable_publish_date, social_image, tag_list, tags, slug, 
 			path, url, canonical_url, comments_count, positive_reactions_count, public_reactions_count, collection_id, 
@@ -24,7 +40,7 @@ func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
-	result, err := r.DB.Exec(query, blog.ID, blog.Title, blog.Content, blog.Description, blog.CoverImage,
+	result, err := r.DB.Exec(insertQuery, blog.ID, blog.Title, blog.Content, blog.Description, blog.CoverImage,
 		blog.ReadablePublishDate, blog.SocialImage, blog.TagList, blog.Tags, blog.Slug, blog.Path, blog.URL,
 		blog.CanonicalURL, blog.CommentsCount, blog.PositiveReactionsCount, blog.PublicReactionsCount,
 		blog.CollectionID, blog.CreatedAt, blog.EditedAt, blog.PublishedAt, blog.LastCommentAt,
@@ -89,4 +105,13 @@ func (r *Repository) GetBlogs() ([]*Blog, error) {
 	}
 
 	return blogs, nil
+}
+
+func (r *Repository) CheckBlogExists(blogID int) (bool, error) {
+	query := `
+		SELECT COUNT(*) > 0 FROM blogs WHERE id = ?
+	`
+	var exists bool
+	err := r.DB.QueryRow(query, blogID).Scan(&exists)
+	return exists, err
 }

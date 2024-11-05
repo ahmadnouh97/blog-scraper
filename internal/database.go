@@ -9,7 +9,7 @@ import (
 )
 
 func InitDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./db/test.db")
+	db, err := sql.Open("sqlite3", "./db/blogs.db")
 	if err != nil {
 		log.Fatal("Failed to open database: ", err)
 	}
