@@ -9,11 +9,15 @@ import (
 
 type Repository struct {
 	DB     *sql.DB
-	logger *utils.CustomLogger
+	Logger *utils.CustomLogger
 }
 
-func NewRepository(db *sql.DB) *Repository {
-	return &Repository{DB: db, logger: utils.NewCustomLogger()}
+func NewRepository(db *sql.DB, logger *utils.CustomLogger) *Repository {
+	return &Repository{DB: db, Logger: logger}
+}
+
+func (r *Repository) CheckConnection() error {
+	return r.DB.Ping()
 }
 
 func (r *Repository) AddBlog(blog *Blog) (int64, error) {
@@ -27,7 +31,7 @@ func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 
 	// If the blog already exists, return an error or a suitable message
 	if exists {
-		r.logger.Warning("Blog with ID %d already exists", blog.ID)
+		r.Logger.Warning("Blog with ID %d already exists", blog.ID)
 		return 0, nil
 	}
 
