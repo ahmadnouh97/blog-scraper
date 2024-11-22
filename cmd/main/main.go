@@ -89,14 +89,14 @@ func main() {
 
 	blogRepo := blog.NewRepository(db, logger)
 
-	scheduler, err := initScheduler(blogRepo, logger)
+	// scheduler, err := initScheduler(blogRepo, logger)
 
 	if err != nil {
 		logger.Error("Failed to initialize scheduler: ", err)
 		return
 	}
 
-	go runScheduler(scheduler, logger)
+	// go runScheduler(scheduler, logger)
 
 	mux := http.NewServeMux()
 
