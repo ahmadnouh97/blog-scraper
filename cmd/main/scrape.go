@@ -11,7 +11,6 @@ import (
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
 
-
 func Scrape() {
 	// Initialize the database
 	db, err := internal.InitDB()
@@ -42,9 +41,9 @@ func Scrape() {
 	// Save blogs to database
 	for _, devToBlog := range devToBlogs {
 		newBlog := &blog.Blog{
-			ID:                         devToBlog.ID,
-			Title:                      devToBlog.Title,
-			Content:                    devToBlog.Content,
+			ID:    devToBlog.ID,
+			Title: devToBlog.Title,
+			// Content:                    devToBlog.Content,
 			Description:                devToBlog.Description,
 			CoverImage:                 devToBlog.CoverImage,
 			ReadablePublishDate:        devToBlog.ReadablePublishDate,

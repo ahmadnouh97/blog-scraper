@@ -38,7 +38,7 @@ func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 	// If the blog does not exist, proceed to insert it
 	insertQuery := `
 		INSERT INTO blogs (
-			id, title, content, description, cover_image, readable_publish_date, social_image, tag_list, tags, slug, 
+			id, title, description, cover_image, readable_publish_date, social_image, tag_list, tags, slug, 
 			path, url, canonical_url, comments_count, positive_reactions_count, public_reactions_count, collection_id, 
 			created_at, edited_at, published_at, last_comment_at, published_timestamp, reading_time_minutes, username, 
 			user_full_name, user_profile_image, user_profile_image_90, organization_name, organization_username, 
@@ -46,7 +46,7 @@ func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
-	result, err := r.DB.Exec(insertQuery, blog.ID, blog.Title, blog.Content, blog.Description, blog.CoverImage,
+	result, err := r.DB.Exec(insertQuery, blog.ID, blog.Title, blog.Description, blog.CoverImage,
 		blog.ReadablePublishDate, blog.SocialImage, blog.TagList, blog.Tags, blog.Slug, blog.Path, blog.URL,
 		blog.CanonicalURL, blog.CommentsCount, blog.PositiveReactionsCount, blog.PublicReactionsCount,
 		blog.CollectionID, blog.CreatedAt, blog.EditedAt, blog.PublishedAt, blog.LastCommentAt,
@@ -65,7 +65,7 @@ func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 func (r *Repository) GetBlogs() ([]*Blog, error) {
 
 	query := `
-		SELECT id, title, content, description, cover_image, readable_publish_date, social_image, tag_list, tags, slug, 
+		SELECT id, title, description, cover_image, readable_publish_date, social_image, tag_list, tags, slug, 
 		path, url, canonical_url, comments_count, positive_reactions_count, public_reactions_count, collection_id, 
 		created_at, edited_at, published_at, last_comment_at, published_timestamp, reading_time_minutes, username, 
 		user_full_name, user_profile_image, user_profile_image_90, organization_name, organization_username, 
@@ -89,7 +89,7 @@ func (r *Repository) GetBlogs() ([]*Blog, error) {
 
 	for rows.Next() {
 		var blog Blog
-		if err := rows.Scan(&blog.ID, &blog.Title, &blog.Content, &blog.Description, &blog.CoverImage,
+		if err := rows.Scan(&blog.ID, &blog.Title, &blog.Description, &blog.CoverImage,
 			&blog.ReadablePublishDate, &blog.SocialImage, &blog.TagList, &blog.Tags, &blog.Slug, &blog.Path,
 			&blog.URL, &blog.CanonicalURL, &blog.CommentsCount, &blog.PositiveReactionsCount,
 			&blog.PublicReactionsCount, &blog.CollectionID, &createdAt, &editedAt, &publishedAt,
