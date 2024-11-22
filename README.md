@@ -35,20 +35,20 @@ A simple Golang tool for scraping and storing blog posts. This tool extracts tit
 
 1. Create a Migration File:
   ```bash
-  goose create <migration_name> sql
+  goose -dir ./db/migrations create <migration_name> sql
   ```
 
 2. Run the Migration:
   ```bash
-  goose up
+  goose -dir ./db/migrations up
   ```
 
 3. Roll Back the last Migration:
   ```bash
-  goose down
+  goose -dir ./db/migrations down
   ```
 
 4. Check Migration Status:
   ```bash
-  goose status
+  goose -dir ./db/migrations status
   ```
