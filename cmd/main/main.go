@@ -38,7 +38,6 @@ func main() {
 	homeHandler := http.HandlerFunc(handlers.Home(blogRepo, logger))
 	getBlogsRoute := http.HandlerFunc(handlers.GetBlogs(blogRepo, logger))
 
-	logger.Debug("API_KEY: %s", API_KEY)
 	getBlogsHandler := middlewares.ApiKeyMiddleware(getBlogsRoute, API_KEY)
 
 	mux.Handle("GET /", homeHandler)
