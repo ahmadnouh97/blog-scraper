@@ -3,8 +3,8 @@ package blog
 import "time"
 
 type Blog struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
+	ID                         int       `json:"id"`
+	Title                      string    `json:"title"`
 	Description                string    `json:"description"`
 	CoverImage                 string    `json:"cover_image"`
 	ReadablePublishDate        string    `json:"readable_publish_date"`
