@@ -21,7 +21,7 @@ func main() {
 		logger.Error("Failed to load .env file !")
 	}
 
-	API_KEY := os.Getenv("API_KEY")
+	SECRET_KEY := os.Getenv("SECRET_KEY")
 
 	db, err := internal.InitDB()
 
@@ -38,7 +38,7 @@ func main() {
 	homeHandler := http.HandlerFunc(handlers.Home(blogRepo, logger))
 	getBlogsRoute := http.HandlerFunc(handlers.GetBlogs(blogRepo, logger))
 
-	getBlogsHandler := middlewares.ApiKeyMiddleware(getBlogsRoute, API_KEY)
+	getBlogsHandler := middlewares.ApiKeyMiddleware(getBlogsRoute, SECRET_KEY)
 
 	mux.Handle("GET /", homeHandler)
 	mux.Handle("GET /blogs", getBlogsHandler)
