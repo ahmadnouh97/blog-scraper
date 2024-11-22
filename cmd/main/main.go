@@ -4,14 +4,70 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/ahmadnouh97/blog-scraper/cmd/handlers"
 	"github.com/ahmadnouh97/blog-scraper/cmd/middlewares"
 	"github.com/ahmadnouh97/blog-scraper/internal"
 	"github.com/ahmadnouh97/blog-scraper/internal/blog"
+	"github.com/ahmadnouh97/blog-scraper/internal/scraper"
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
+	"github.com/go-co-op/gocron/v2"
 	"github.com/joho/godotenv"
 )
+
+func initScheduler(blogRepo *blog.Repository, logger *utils.CustomLogger) (gocron.Scheduler, error) {
+	location, err := time.LoadLocation("Europe/Istanbul")
+	if err != nil {
+		return nil, err
+	}
+
+	scheduler, err := gocron.NewScheduler(gocron.WithLocation(location))
+
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Info("Scheduler initialized successfully")
+
+	job, err := scheduler.NewJob(
+		gocron.DurationJob(
+			25*time.Second,
+		),
+		gocron.NewTask(
+			scraper.ScrapeBlogs,
+			blogRepo,
+			logger,
+		),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Info("Job %s initialized successfully", job.ID())
+
+	return scheduler, nil
+}
+
+func runScheduler(scheduler gocron.Scheduler, logger *utils.CustomLogger) {
+	scheduler.Start()
+
+	// block until you are ready to shut down
+	select {
+	case <-time.After(1 * time.Minute):
+	}
+
+	// when you're done, shut it down
+	err := scheduler.Shutdown()
+
+	if err != nil {
+		logger.Error("Failed to shutdown scheduler: ", err)
+		os.Exit(1)
+	}
+
+	logger.Info("Scheduler shutdown successfully")
+}
 
 func main() {
 	logger := utils.NewCustomLogger()
@@ -32,6 +88,15 @@ func main() {
 	defer db.Close()
 
 	blogRepo := blog.NewRepository(db, logger)
+
+	scheduler, err := initScheduler(blogRepo, logger)
+
+	if err != nil {
+		logger.Error("Failed to initialize scheduler: ", err)
+		return
+	}
+
+	go runScheduler(scheduler, logger)
 
 	mux := http.NewServeMux()
 
