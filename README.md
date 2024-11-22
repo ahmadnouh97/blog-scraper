@@ -52,3 +52,18 @@ A simple Golang tool for scraping and storing blog posts. This tool extracts tit
   ```bash
   goose -dir ./db/migrations sqlite3 ./db/blogs.db status
   ```
+
+
+## Build & Run with Docker
+
+- Build:
+  ```bash
+  docker build --tag IMAGE_NAME .
+  ```
+
+- Run:
+  ```bash
+  docker run -e SECRET_KEY="SECRET_KEY" -p 8000:8000 IMAGE_NAME
+  ```
+
+  ***SECRET_KEY***: A secret key for authorization.
