@@ -3,15 +3,25 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/ahmadnouh97/blog-scraper/cmd/handlers"
+	"github.com/ahmadnouh97/blog-scraper/cmd/middlewares"
 	"github.com/ahmadnouh97/blog-scraper/internal"
 	"github.com/ahmadnouh97/blog-scraper/internal/blog"
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	logger := utils.NewCustomLogger()
+	err := godotenv.Load()
+
+	if err != nil {
+		logger.Error("Failed to load .env file !")
+	}
+
+	API_KEY := os.Getenv("API_KEY")
 
 	db, err := internal.InitDB()
 
@@ -24,8 +34,15 @@ func main() {
 	blogRepo := blog.NewRepository(db, logger)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", handlers.Home(blogRepo, logger))
-	mux.HandleFunc("GET /blogs", handlers.GetBlogs(blogRepo, logger))
+
+	homeHandler := http.HandlerFunc(handlers.Home(blogRepo, logger))
+	getBlogsRoute := http.HandlerFunc(handlers.GetBlogs(blogRepo, logger))
+
+	logger.Debug("API_KEY: %s", API_KEY)
+	getBlogsHandler := middlewares.ApiKeyMiddleware(getBlogsRoute, API_KEY)
+
+	mux.Handle("GET /", homeHandler)
+	mux.Handle("GET /blogs", getBlogsHandler)
 
 	logger.Info("Server is running on http://localhost:8000")
 
