@@ -9,7 +9,7 @@ import (
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
 
-func Home(repo *blog.Repository, logger *utils.CustomLogger) func(http.ResponseWriter, *http.Request) {
+func CheckStatus(repo *blog.Repository, logger *utils.CustomLogger) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("Checking database connection..")
 		w.WriteHeader(http.StatusOK)

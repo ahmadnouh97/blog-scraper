@@ -100,14 +100,14 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	homeHandler := http.HandlerFunc(handlers.Home(blogRepo, logger))
+	statusHandler := http.HandlerFunc(handlers.CheckStatus(blogRepo, logger))
 	getBlogsRoute := http.HandlerFunc(handlers.GetBlogs(blogRepo, logger))
 	scrapeBlogsRoute := http.HandlerFunc(handlers.ScrapeBlogs(blogRepo, logger))
 
 	getBlogsHandler := middlewares.ApiKeyMiddleware(getBlogsRoute, SECRET_KEY)
 	scrapeBlogsHandler := middlewares.ApiKeyMiddleware(scrapeBlogsRoute, SECRET_KEY)
 
-	mux.Handle("GET /", homeHandler)
+	mux.Handle("GET /status", statusHandler)
 	mux.Handle("GET /blogs", getBlogsHandler)
 	mux.Handle("GET /scrape", scrapeBlogsHandler)
 
