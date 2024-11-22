@@ -102,11 +102,14 @@ func main() {
 
 	homeHandler := http.HandlerFunc(handlers.Home(blogRepo, logger))
 	getBlogsRoute := http.HandlerFunc(handlers.GetBlogs(blogRepo, logger))
+	scrapeBlogsRoute := http.HandlerFunc(handlers.ScrapeBlogs(blogRepo, logger))
 
 	getBlogsHandler := middlewares.ApiKeyMiddleware(getBlogsRoute, SECRET_KEY)
+	scrapeBlogsHandler := middlewares.ApiKeyMiddleware(scrapeBlogsRoute, SECRET_KEY)
 
 	mux.Handle("GET /", homeHandler)
 	mux.Handle("GET /blogs", getBlogsHandler)
+	mux.Handle("GET /scrape", scrapeBlogsHandler)
 
 	logger.Info("Server is running on http://localhost:8000")
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ahmadnouh97/blog-scraper/internal/blog"
+	"github.com/ahmadnouh97/blog-scraper/internal/scraper"
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
 
@@ -36,7 +37,7 @@ func GetBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.Respo
 			return
 		}
 
-		logger.Info("Blogs fetched successfully")
+		logger.Info("Blogs fetched from database successfully")
 
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
@@ -46,7 +47,55 @@ func GetBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.Respo
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
-		logger.Info("Response encoded successfully")
+		logger.Info("Blogs fetched successfully")
+	}
+}
 
+func ScrapeBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		queryParams := r.URL.Query()
+
+		// Default values
+		defaults := map[string]string{
+			"per_page":       "60",
+			"page":           "0",
+			"sort_by":        "published_at",
+			"sort_direction": "desc",
+		}
+
+		// Helper function to get a query parameter or default value
+		getOrDefault := func(key string) string {
+			if value := queryParams.Get(key); value != "" {
+				return value
+			}
+			return defaults[key]
+		}
+
+		// Extract query parameters with defaults
+		perPage := getOrDefault("per_page")
+		page := getOrDefault("page")
+		sortBy := getOrDefault("sort_by")
+		sortDirection := getOrDefault("sort_direction")
+
+		logger.Info("Scraping...")
+		devToBlogs, err := scraper.ScrapeDevTo(perPage, page, sortBy, sortDirection)
+
+		if err != nil {
+			logger.Error("Failed to scrape Dev.to: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		logger.Info("Blogs scraped successfully")
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+
+		if err := json.NewEncoder(w).Encode(devToBlogs); err != nil {
+			logger.Error("Failed to encode response: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		logger.Info("Blogs fetched successfully")
 	}
 }

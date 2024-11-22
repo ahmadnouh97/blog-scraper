@@ -7,19 +7,24 @@ import (
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
 
-func ScrapeBlogs(blogRepo *blog.Repository, logger *utils.CustomLogger) {
+func ScrapeDevTo(perPage string, page string, sortBy string, sortDirection string) ([]*DevToData, error) {
 	// Scrape Dev.to
 	params := map[string]string{
-		"per_page":       "60",
-		"page":           "0",
-		"sort_by":        "published_at",
-		"sort_direction": "desc",
+		"per_page":       perPage,
+		"page":           page,
+		"sort_by":        sortBy,
+		"sort_direction": sortDirection,
 	}
 
-	devToBlogs, err := FetchBlogs(params)
+	return FetchBlogs(params)
+}
+
+func ScrapeBlogs(blogRepo *blog.Repository, logger *utils.CustomLogger) {
+	// Scrape Dev.to
+	devToBlogs, err := ScrapeDevTo("60", "0", "published_at", "desc")
 
 	if err != nil {
-		logger.Error("Failed to fetch Dev.to blogs: %v", err)
+		logger.Error("Failed to scrape Dev.to: %v", err)
 		return
 	}
 
