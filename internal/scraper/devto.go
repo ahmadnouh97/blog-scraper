@@ -30,7 +30,7 @@ type DevToData struct {
 	CommentsCount          int         `json:"comments_count"`
 	PositiveReactionsCount int         `json:"positive_reactions_count"`
 	PublicReactionsCount   int         `json:"public_reactions_count"`
-	CollectionID           interface{} `json:"collection_id"`
+	CollectionID           int         `json:"collection_id"`
 	CreatedAt              time.Time   `json:"created_at"`
 	EditedAt               time.Time   `json:"edited_at"`
 	CrosspostedAt          interface{} `json:"crossposted_at"`

@@ -5,7 +5,6 @@ import "time"
 type Blog struct {
 	ID    int    `json:"id"`
 	Title string `json:"title"`
-	// Content                    string    `json:"content"`
 	Description                string    `json:"description"`
 	CoverImage                 string    `json:"cover_image"`
 	ReadablePublishDate        string    `json:"readable_publish_date"`

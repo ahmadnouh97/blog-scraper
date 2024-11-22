@@ -31,8 +31,7 @@ func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 
 	// If the blog already exists, return an error or a suitable message
 	if exists {
-		r.Logger.Warning("Blog with ID %d already exists", blog.ID)
-		return 0, nil
+		return -1, nil
 	}
 
 	// If the blog does not exist, proceed to insert it
@@ -43,7 +42,7 @@ func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 			created_at, edited_at, published_at, last_comment_at, published_timestamp, reading_time_minutes, username, 
 			user_full_name, user_profile_image, user_profile_image_90, organization_name, organization_username, 
 			organization_profile_image, organization_profile_image_90, organization_slug, type_of
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	result, err := r.DB.Exec(insertQuery, blog.ID, blog.Title, blog.Description, blog.CoverImage,
