@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/ahmadnouh97/blog-scraper/internal/blog"
 	"github.com/ahmadnouh97/blog-scraper/internal/scraper"
@@ -29,7 +30,29 @@ func CheckStatus(repo *blog.Repository, logger *utils.CustomLogger) func(http.Re
 func GetBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("Fetching blogs..")
-		blogs, err := repo.GetBlogs()
+		// Read query parameters
+		defaults := map[string]int{
+			"page":      1,
+			"page_size": 10,
+		}
+		queryParams := r.URL.Query()
+
+		getOrDefault := func(key string) int {
+			if value := queryParams.Get(key); value != "" {
+				number, err := strconv.Atoi(value)
+				if err != nil {
+					return defaults[key]
+				}
+				return number
+			}
+			return defaults[key]
+		}
+
+		page := getOrDefault("page")
+		pageSize := getOrDefault("page_size")
+
+		// Get blogs
+		blogs, totalCount, err := repo.GetBlogs(page, pageSize)
 
 		if err != nil {
 			logger.Error("Failed to get blogs: %v", err)
@@ -42,7 +65,16 @@ func GetBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.Respo
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 
-		if err := json.NewEncoder(w).Encode(blogs); err != nil {
+		response := &blog.BlogsPaginationResponse{
+			Blogs:      blogs,
+			Page:       page,
+			PageSize:   pageSize,
+			TotalItems: totalCount,
+			TotalPages: (totalCount + pageSize - 1) / pageSize,
+			HasMore:    totalCount > page*pageSize,
+		}
+
+		if err := json.NewEncoder(w).Encode(response); err != nil {
 			logger.Error("Failed to encode response: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

@@ -36,3 +36,12 @@ type Blog struct {
 	OrganizationSlug           string    `json:"organization_slug"`
 	TypeOf                     string    `json:"type_of"`
 }
+
+type BlogsPaginationResponse struct {
+	Blogs      []*Blog `json:"blogs"`
+	Page       int     `json:"page"`
+	PageSize   int     `json:"pageSize"`
+	TotalItems int     `json:"totalItems"`
+	TotalPages int     `json:"totalPages"`
+	HasMore    bool    `json:"hasMore"`
+}

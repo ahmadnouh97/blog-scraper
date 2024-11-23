@@ -20,6 +20,13 @@ func (r *Repository) CheckConnection() error {
 	return r.DB.Ping()
 }
 
+func (r *Repository) CountBlogs() (int, error) {
+	query := "SELECT COUNT(*) FROM blogs"
+	var count int
+	err := r.DB.QueryRow(query).Scan(&count)
+	return count, err
+}
+
 func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 	// Check if the blog already exists by searching for the unique ID
 	var exists bool
@@ -61,8 +68,18 @@ func (r *Repository) AddBlog(blog *Blog) (int64, error) {
 	return result.LastInsertId()
 }
 
-func (r *Repository) GetBlogs() ([]*Blog, error) {
+func (r *Repository) GetBlogs(page, pageSize int) ([]*Blog, int, error) {
+	// Get total count first
+	totalCount, err := r.CountBlogs()
 
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Calculate offset
+	offset := (page - 1) * pageSize
+
+	// Main query with pagination
 	query := `
 		SELECT id, title, description, cover_image, readable_publish_date, social_image, tag_list, tags, slug, 
 		path, url, canonical_url, comments_count, positive_reactions_count, public_reactions_count, collection_id, 
@@ -70,13 +87,14 @@ func (r *Repository) GetBlogs() ([]*Blog, error) {
 		user_full_name, user_profile_image, user_profile_image_90, organization_name, organization_username, 
 		organization_profile_image, organization_profile_image_90, organization_slug, type_of
 		FROM blogs
+		ORDER BY published_at DESC
+		LIMIT ? OFFSET ?
 	`
 
-	rows, err := r.DB.Query(query)
+	rows, err := r.DB.Query(query, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-
 	defer rows.Close()
 
 	blogs := []*Blog{}
@@ -97,7 +115,7 @@ func (r *Repository) GetBlogs() ([]*Blog, error) {
 			&blog.OrganizationUsername, &blog.OrganizationProfileImage, &blog.OrganizationProfileImage90,
 			&blog.OrganizationSlug, &blog.TypeOf,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		blog.CreatedAt, _ = time.Parse("2006-01-02 15:04:05-07:00", createdAt)
@@ -109,7 +127,7 @@ func (r *Repository) GetBlogs() ([]*Blog, error) {
 		blogs = append(blogs, &blog)
 	}
 
-	return blogs, nil
+	return blogs, totalCount, nil
 }
 
 func (r *Repository) CheckBlogExists(blogID int) (bool, error) {
@@ -119,11 +137,4 @@ func (r *Repository) CheckBlogExists(blogID int) (bool, error) {
 	var exists bool
 	err := r.DB.QueryRow(query, blogID).Scan(&exists)
 	return exists, err
-}
-
-func (r *Repository) CountBlogs() (int, error) {
-	query := "SELECT COUNT(*) FROM blogs"
-	var count int
-	err := r.DB.QueryRow(query).Scan(&count)
-	return count, err
 }
