@@ -111,7 +111,7 @@ func main() {
 	mux.Handle("GET /blogs", getBlogsHandler)
 	mux.Handle("GET /scrape", scrapeBlogsHandler)
 
-	logger.Info("Server is running on http://localhost:8000")
+	logger.Info("Server is running ✅, check http://localhost:8000/status for status")
 
 	err = http.ListenAndServe(":8000", mux)
 
