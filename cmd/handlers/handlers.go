@@ -78,7 +78,7 @@ func ScrapeBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.Re
 		sortDirection := getOrDefault("sort_direction")
 
 		logger.Info("Scraping...")
-		devToBlogs, err := scraper.ScrapeDevTo(perPage, page, sortBy, sortDirection)
+		devToBlogs, err := scraper.ScrapeDevToBlogs(perPage, page, sortBy, sortDirection)
 
 		if err != nil {
 			logger.Error("Failed to scrape Dev.to: %v", err)
@@ -88,6 +88,11 @@ func ScrapeBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.Re
 
 		logger.Info("Blogs scraped successfully")
 
+		// Save blogs to database
+		logger.Info("Saving blogs to database..")
+		scraper.SaveDevToBlogs(devToBlogs, repo, logger)
+		logger.Info("Blogs saved to database successfully")
+
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 
@@ -96,6 +101,6 @@ func ScrapeBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.Re
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
-		logger.Info("Blogs fetched successfully")
+		logger.Info("Blogs scrapped and saved successfully")
 	}
 }

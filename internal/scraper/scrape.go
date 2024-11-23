@@ -7,7 +7,7 @@ import (
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
 
-func ScrapeDevTo(perPage string, page string, sortBy string, sortDirection string) ([]*DevToData, error) {
+func ScrapeDevToBlogs(perPage string, page string, sortBy string, sortDirection string) ([]*DevToData, error) {
 	// Scrape Dev.to
 	params := map[string]string{
 		"per_page":       perPage,
@@ -19,15 +19,7 @@ func ScrapeDevTo(perPage string, page string, sortBy string, sortDirection strin
 	return FetchBlogs(params)
 }
 
-func ScrapeBlogs(blogRepo *blog.Repository, logger *utils.CustomLogger) {
-	// Scrape Dev.to
-	devToBlogs, err := ScrapeDevTo("60", "0", "published_at", "desc")
-
-	if err != nil {
-		logger.Error("Failed to scrape Dev.to: %v", err)
-		return
-	}
-
+func SaveDevToBlogs(devToBlogs []*DevToData, blogRepo *blog.Repository, logger *utils.CustomLogger) {
 	// Save blogs to database
 	savedBlogs := 0
 	for _, devToBlog := range devToBlogs {
@@ -82,4 +74,17 @@ func ScrapeBlogs(blogRepo *blog.Repository, logger *utils.CustomLogger) {
 	}
 
 	logger.Info("%v blogs saved to database", savedBlogs)
+}
+
+func ScrapeBlogs(blogRepo *blog.Repository, logger *utils.CustomLogger) {
+	// Scrape Dev.to
+	devToBlogs, err := ScrapeDevToBlogs("60", "0", "published_at", "desc")
+
+	if err != nil {
+		logger.Error("Failed to scrape Dev.to: %v", err)
+		return
+	}
+
+	// Save blogs to database
+	SaveDevToBlogs(devToBlogs, blogRepo, logger)
 }
