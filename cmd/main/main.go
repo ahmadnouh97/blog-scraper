@@ -103,13 +103,16 @@ func main() {
 	statusHandler := http.HandlerFunc(handlers.CheckStatus(blogRepo, logger))
 	getBlogsRoute := http.HandlerFunc(handlers.GetBlogs(blogRepo, logger))
 	scrapeBlogsRoute := http.HandlerFunc(handlers.ScrapeBlogs(blogRepo, logger))
+	countBlogsRoute := http.HandlerFunc(handlers.CountBlogs(blogRepo, logger))
 
 	getBlogsHandler := middlewares.ApiKeyMiddleware(getBlogsRoute, SECRET_KEY)
 	scrapeBlogsHandler := middlewares.ApiKeyMiddleware(scrapeBlogsRoute, SECRET_KEY)
+	countBlogsHandler := middlewares.ApiKeyMiddleware(countBlogsRoute, SECRET_KEY)
 
 	mux.Handle("GET /status", statusHandler)
 	mux.Handle("GET /blogs", getBlogsHandler)
 	mux.Handle("GET /scrape", scrapeBlogsHandler)
+	mux.Handle("GET /count", countBlogsHandler)
 
 	logger.Info("Server is running ✅, check http://localhost:8000/status for status")
 

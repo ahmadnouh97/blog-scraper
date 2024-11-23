@@ -120,3 +120,10 @@ func (r *Repository) CheckBlogExists(blogID int) (bool, error) {
 	err := r.DB.QueryRow(query, blogID).Scan(&exists)
 	return exists, err
 }
+
+func (r *Repository) CountBlogs() (int, error) {
+	query := "SELECT COUNT(*) FROM blogs"
+	var count int
+	err := r.DB.QueryRow(query).Scan(&count)
+	return count, err
+}

@@ -104,3 +104,22 @@ func ScrapeBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.Re
 		logger.Info("Blogs scrapped and saved successfully")
 	}
 }
+
+func CountBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		count, err := repo.CountBlogs()
+
+		if err != nil {
+			logger.Error("Failed to count blogs: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+
+		if err := json.NewEncoder(w).Encode(count); err != nil {
+			logger.Error("Failed to encode response: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
