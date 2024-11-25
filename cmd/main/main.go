@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"github.com/ahmadnouh97/blog-scraper/cmd/middlewares"
 	"github.com/ahmadnouh97/blog-scraper/internal"
 	"github.com/ahmadnouh97/blog-scraper/internal/blog"
+	"github.com/ahmadnouh97/blog-scraper/internal/llm"
 	"github.com/ahmadnouh97/blog-scraper/internal/scraper"
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 	"github.com/go-co-op/gocron/v2"
@@ -70,6 +72,7 @@ func runScheduler(scheduler gocron.Scheduler, logger *utils.CustomLogger) {
 }
 
 func main() {
+	ctx := context.Background()
 	logger := utils.NewCustomLogger()
 	err := godotenv.Load()
 
@@ -78,14 +81,22 @@ func main() {
 	}
 
 	SECRET_KEY := os.Getenv("SECRET_KEY")
+	GEMINI_API_KEY := os.Getenv("GEMINI_API_KEY")
 
-	db, err := internal.InitDB()
+	filepath := "./db/blogs.db"
+	db, err := internal.InitDB(filepath)
 
 	if err != nil {
 		log.Fatal("Failed to initialize database: ", err)
 	}
 
+	chain, err := llm.InitSQLDatabaseChain(ctx, GEMINI_API_KEY, filepath, 100)
+
 	defer db.Close()
+
+	if err != nil {
+		log.Fatal("Failed to initialize chain: ", err)
+	}
 
 	blogRepo := blog.NewRepository(db, logger)
 
@@ -104,15 +115,18 @@ func main() {
 	getBlogsRoute := http.HandlerFunc(handlers.GetBlogs(blogRepo, logger))
 	scrapeBlogsRoute := http.HandlerFunc(handlers.ScrapeBlogs(blogRepo, logger))
 	countBlogsRoute := http.HandlerFunc(handlers.CountBlogs(blogRepo, logger))
+	askQuestionRoute := http.HandlerFunc(handlers.AskQuestion(ctx, chain, logger))
 
 	getBlogsHandler := middlewares.ApiKeyMiddleware(getBlogsRoute, SECRET_KEY)
 	scrapeBlogsHandler := middlewares.ApiKeyMiddleware(scrapeBlogsRoute, SECRET_KEY)
 	countBlogsHandler := middlewares.ApiKeyMiddleware(countBlogsRoute, SECRET_KEY)
+	askQuestionHandler := middlewares.ApiKeyMiddleware(askQuestionRoute, SECRET_KEY)
 
 	mux.Handle("GET /status", statusHandler)
 	mux.Handle("GET /blogs", getBlogsHandler)
 	mux.Handle("GET /scrape", scrapeBlogsHandler)
 	mux.Handle("GET /count", countBlogsHandler)
+	mux.Handle("GET /ask", askQuestionHandler)
 
 	logger.Info("Server is running ✅, check http://localhost:8000/status for status")
 

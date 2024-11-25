@@ -8,8 +8,8 @@ import (
 	"github.com/pressly/goose"
 )
 
-func InitDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./db/blogs.db")
+func InitDB(filepath string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", filepath)
 	if err != nil {
 		log.Fatal("Failed to open database: ", err)
 	}

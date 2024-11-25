@@ -1,11 +1,15 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"github.com/tmc/langchaingo/chains"
+
 	"github.com/ahmadnouh97/blog-scraper/internal/blog"
+	"github.com/ahmadnouh97/blog-scraper/internal/llm"
 	"github.com/ahmadnouh97/blog-scraper/internal/scraper"
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
@@ -150,6 +154,38 @@ func CountBlogs(repo *blog.Repository, logger *utils.CustomLogger) func(http.Res
 		w.WriteHeader(http.StatusOK)
 
 		if err := json.NewEncoder(w).Encode(count); err != nil {
+			logger.Error("Failed to encode response: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
+
+func AskQuestion(ctx context.Context, chain *chains.SQLDatabaseChain, logger *utils.CustomLogger) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		queryParams := r.URL.Query()
+		question := queryParams.Get("question")
+
+		if question == "" {
+			http.Error(w, "Please provide a question", http.StatusBadRequest)
+			return
+		}
+
+		answer, err := llm.Run(ctx, chain, question)
+
+		if err != nil {
+			logger.Error("Failed to answer the question: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+
+		llmAnswer := &llm.LLMResponse{
+			Answer: answer,
+		}
+
+		if err := json.NewEncoder(w).Encode(llmAnswer); err != nil {
 			logger.Error("Failed to encode response: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
