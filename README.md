@@ -30,3 +30,40 @@ A simple Golang tool for scraping and storing blog posts. This tool extracts tit
   ```bash
   go run cmd/main/main.go
   ```
+
+## Migrations
+
+1. Create a Migration File:
+  ```bash
+  goose -dir ./db/migrations create <migration_name> sql
+  ```
+
+2. Run the Migration:
+  ```bash
+  goose -dir ./db/migrations sqlite3 ./db/blogs.db up
+  ```
+
+3. Roll Back the last Migration:
+  ```bash
+  goose -dir ./db/migrations sqlite3 ./db/blogs.db down
+  ```
+
+4. Check Migration Status:
+  ```bash
+  goose -dir ./db/migrations sqlite3 ./db/blogs.db status
+  ```
+
+
+## Build & Run with Docker
+
+- Build:
+  ```bash
+  docker build --tag IMAGE_NAME .
+  ```
+
+- Run:
+  ```bash
+  docker run -e SECRET_KEY="SECRET_KEY" -p 8000:8000 IMAGE_NAME
+  ```
+
+  ***SECRET_KEY***: A secret key for authorization.

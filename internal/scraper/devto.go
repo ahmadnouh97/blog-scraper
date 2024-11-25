@@ -13,11 +13,11 @@ import (
 )
 
 type DevToData struct {
-	TypeOf                 string      `json:"type_of"`
-	ID                     int         `json:"id"`
-	Title                  string      `json:"title"`
-	Description            string      `json:"description"`
-	Content                string      `json:"content"`
+	TypeOf      string `json:"type_of"`
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	// Content                string      `json:"content"`
 	CoverImage             string      `json:"cover_image"`
 	ReadablePublishDate    string      `json:"readable_publish_date"`
 	SocialImage            string      `json:"social_image"`
@@ -30,7 +30,7 @@ type DevToData struct {
 	CommentsCount          int         `json:"comments_count"`
 	PositiveReactionsCount int         `json:"positive_reactions_count"`
 	PublicReactionsCount   int         `json:"public_reactions_count"`
-	CollectionID           interface{} `json:"collection_id"`
+	CollectionID           int         `json:"collection_id"`
 	CreatedAt              time.Time   `json:"created_at"`
 	EditedAt               time.Time   `json:"edited_at"`
 	CrosspostedAt          interface{} `json:"crossposted_at"`
@@ -63,7 +63,7 @@ func FetchBlogs(params map[string]string) ([]*DevToData, error) {
 		return nil, err
 	}
 
-	devToData, err = scrapeBlogsContent(devToData)
+	// devToData, err = scrapeBlogsContent(devToData)
 
 	if err != nil {
 		return nil, err
@@ -126,14 +126,14 @@ func getBlogMarkdown(path string) (string, error) {
 	return markdown, nil
 }
 
-func scrapeBlogsContent(devToData []*DevToData) ([]*DevToData, error) {
-	for _, blog := range devToData {
-		markdown, err := getBlogMarkdown(blog.Path)
+// func scrapeBlogsContent(devToData []*DevToData) ([]*DevToData, error) {
+// 	for _, blog := range devToData {
+// 		markdown, err := getBlogMarkdown(blog.Path)
 
-		if err != nil {
-			return nil, err
-		}
-		blog.Content = markdown
-	}
-	return devToData, nil
-}
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		blog.Content = markdown
+// 	}
+// 	return devToData, nil
+// }

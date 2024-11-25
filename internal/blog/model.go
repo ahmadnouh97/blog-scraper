@@ -5,7 +5,6 @@ import "time"
 type Blog struct {
 	ID                         int       `json:"id"`
 	Title                      string    `json:"title"`
-	Content                    string    `json:"content"`
 	Description                string    `json:"description"`
 	CoverImage                 string    `json:"cover_image"`
 	ReadablePublishDate        string    `json:"readable_publish_date"`
@@ -36,4 +35,13 @@ type Blog struct {
 	OrganizationProfileImage90 string    `json:"organization_profile_image_90"`
 	OrganizationSlug           string    `json:"organization_slug"`
 	TypeOf                     string    `json:"type_of"`
+}
+
+type BlogsPaginationResponse struct {
+	Blogs      []*Blog `json:"blogs"`
+	Page       int     `json:"page"`
+	PageSize   int     `json:"pageSize"`
+	TotalItems int     `json:"totalItems"`
+	TotalPages int     `json:"totalPages"`
+	HasMore    bool    `json:"hasMore"`
 }

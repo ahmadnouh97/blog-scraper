@@ -1,108 +1,125 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"strings"
+	"net/http"
+	"os"
+	"time"
 
+	"github.com/ahmadnouh97/blog-scraper/cmd/handlers"
+	"github.com/ahmadnouh97/blog-scraper/cmd/middlewares"
 	"github.com/ahmadnouh97/blog-scraper/internal"
 	"github.com/ahmadnouh97/blog-scraper/internal/blog"
 	"github.com/ahmadnouh97/blog-scraper/internal/scraper"
 	"github.com/ahmadnouh97/blog-scraper/internal/utils"
+	"github.com/go-co-op/gocron/v2"
+	"github.com/joho/godotenv"
 )
 
+func initScheduler(blogRepo *blog.Repository, logger *utils.CustomLogger) (gocron.Scheduler, error) {
+	location, err := time.LoadLocation("Europe/Istanbul")
+	if err != nil {
+		return nil, err
+	}
+
+	scheduler, err := gocron.NewScheduler(gocron.WithLocation(location))
+
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Info("Scheduler initialized successfully")
+
+	job, err := scheduler.NewJob(
+		gocron.DurationJob(
+			25*time.Second,
+		),
+		gocron.NewTask(
+			scraper.ScrapeBlogs,
+			blogRepo,
+			logger,
+		),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Info("Job %s initialized successfully", job.ID())
+
+	return scheduler, nil
+}
+
+func runScheduler(scheduler gocron.Scheduler, logger *utils.CustomLogger) {
+	scheduler.Start()
+
+	// block until you are ready to shut down
+	select {
+	case <-time.After(1 * time.Minute):
+	}
+
+	// when you're done, shut it down
+	err := scheduler.Shutdown()
+
+	if err != nil {
+		logger.Error("Failed to shutdown scheduler: ", err)
+		os.Exit(1)
+	}
+
+	logger.Info("Scheduler shutdown successfully")
+}
+
 func main() {
-	// Initialize the database
+	logger := utils.NewCustomLogger()
+	err := godotenv.Load()
+
+	if err != nil {
+		logger.Error("Failed to load .env file !")
+	}
+
+	SECRET_KEY := os.Getenv("SECRET_KEY")
+
 	db, err := internal.InitDB()
 
 	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		log.Fatal("Failed to initialize database: ", err)
 	}
 
 	defer db.Close()
 
-	// Initialize blog repository
-	blogRepo := blog.NewRepository(db)
+	blogRepo := blog.NewRepository(db, logger)
 
-	// Scrape Dev.to
-	params := map[string]string{
-		"per_page":       "60",
-		"page":           "0",
-		"sort_by":        "published_at",
-		"sort_direction": "desc",
-	}
-
-	devToBlogs, err := scraper.FetchBlogs(params)
+	// scheduler, err := initScheduler(blogRepo, logger)
 
 	if err != nil {
-		log.Fatal("Failed to fetch Dev.to blogs: ", err)
+		logger.Error("Failed to initialize scheduler: ", err)
+		return
 	}
 
-	// Save blogs to database
-	for _, devToBlog := range devToBlogs {
-		newBlog := &blog.Blog{
-			ID:                         devToBlog.ID,
-			Title:                      devToBlog.Title,
-			Content:                    devToBlog.Content,
-			Description:                devToBlog.Description,
-			CoverImage:                 devToBlog.CoverImage,
-			ReadablePublishDate:        devToBlog.ReadablePublishDate,
-			SocialImage:                devToBlog.SocialImage,
-			TagList:                    strings.Join(devToBlog.TagList, ","),
-			Tags:                       devToBlog.Tags,
-			Slug:                       devToBlog.Slug,
-			Path:                       devToBlog.Path,
-			URL:                        devToBlog.URL,
-			CanonicalURL:               devToBlog.CanonicalURL,
-			CommentsCount:              devToBlog.CommentsCount,
-			PositiveReactionsCount:     devToBlog.PositiveReactionsCount,
-			PublicReactionsCount:       devToBlog.PublicReactionsCount,
-			CreatedAt:                  devToBlog.CreatedAt,
-			EditedAt:                   devToBlog.EditedAt,
-			PublishedAt:                devToBlog.PublishedAt,
-			LastCommentAt:              devToBlog.LastCommentAt,
-			PublishedTimestamp:         devToBlog.PublishedTimestamp,
-			ReadingTimeMinutes:         devToBlog.ReadingTimeMinutes,
-			Username:                   devToBlog.User.Username,
-			UserFullName:               devToBlog.User.Name,
-			UserProfileImage:           devToBlog.User.ProfileImage,
-			UserProfileImage90:         devToBlog.User.ProfileImage90,
-			OrganizationName:           devToBlog.Organization.Name,
-			OrganizationUsername:       devToBlog.Organization.Username,
-			OrganizationProfileImage:   devToBlog.Organization.ProfileImage,
-			OrganizationProfileImage90: devToBlog.Organization.ProfileImage90,
-			OrganizationSlug:           devToBlog.Organization.Slug,
-			TypeOf:                     devToBlog.TypeOf,
-		}
+	// go runScheduler(scheduler, logger)
 
-		if _, err := blogRepo.AddBlog(newBlog); err != nil {
-			log.Fatal("Failed to save blog to database: ", err)
-		}
-	}
+	mux := http.NewServeMux()
 
-	// Load blogs from database
-	blogs, err := blogRepo.GetBlogs()
+	statusHandler := http.HandlerFunc(handlers.CheckStatus(blogRepo, logger))
+	getBlogsRoute := http.HandlerFunc(handlers.GetBlogs(blogRepo, logger))
+	scrapeBlogsRoute := http.HandlerFunc(handlers.ScrapeBlogs(blogRepo, logger))
+	countBlogsRoute := http.HandlerFunc(handlers.CountBlogs(blogRepo, logger))
+
+	getBlogsHandler := middlewares.ApiKeyMiddleware(getBlogsRoute, SECRET_KEY)
+	scrapeBlogsHandler := middlewares.ApiKeyMiddleware(scrapeBlogsRoute, SECRET_KEY)
+	countBlogsHandler := middlewares.ApiKeyMiddleware(countBlogsRoute, SECRET_KEY)
+
+	mux.Handle("GET /status", statusHandler)
+	mux.Handle("GET /blogs", getBlogsHandler)
+	mux.Handle("GET /scrape", scrapeBlogsHandler)
+	mux.Handle("GET /count", countBlogsHandler)
+
+	logger.Info("Server is running ✅, check http://localhost:8000/status for status")
+
+	err = http.ListenAndServe(":8000", mux)
 
 	if err != nil {
-		log.Fatal("Failed to load blogs from database: ", err)
+		logger.Error("Failed to start server: ", err)
+		return
 	}
-
-	// Save blogs to JSON file
-	err = utils.SaveJSON(blogs, "blogs.json")
-
-	if err != nil {
-		log.Fatal("Failed to save blogs to JSON file: ", err)
-	}
-
-	fmt.Println("Blogs saved to JSON file: blogs.json")
-
-	// Load blogs from JSON file
-	blogs, err = utils.LoadJSON[[]*blog.Blog]("blogs.json")
-
-	if err != nil {
-		log.Fatal("Failed to load blogs from JSON file: ", err)
-	}
-
-	// Print the length of the loaded blogs
-	fmt.Printf("Loaded %d blogs from JSON file\n", len(blogs))
 }
