@@ -12,7 +12,6 @@ A simple Golang tool for scraping and storing blog posts. This tool extracts tit
 - **Golang**: Core programming language
 - **goose**: For DB Migrations
 - **SQLite3**: For lightweight data storage
-- **html-to-markdown**: For Parsing html blog content to markdown
 
 ## Installation
 
