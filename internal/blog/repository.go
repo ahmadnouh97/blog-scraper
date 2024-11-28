@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/ahmadnouh97/blog-scraper/internal/utils"
+	"github.com/ahmadnouh97/blog-scraper-qa/internal/utils"
 )
 
 type Repository struct {

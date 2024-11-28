@@ -8,10 +8,10 @@ import (
 
 	"github.com/tmc/langchaingo/chains"
 
-	"github.com/ahmadnouh97/blog-scraper/internal/blog"
-	"github.com/ahmadnouh97/blog-scraper/internal/llm"
-	"github.com/ahmadnouh97/blog-scraper/internal/scraper"
-	"github.com/ahmadnouh97/blog-scraper/internal/utils"
+	"github.com/ahmadnouh97/blog-scraper-qa/internal/blog"
+	"github.com/ahmadnouh97/blog-scraper-qa/internal/llm"
+	"github.com/ahmadnouh97/blog-scraper-qa/internal/scraper"
+	"github.com/ahmadnouh97/blog-scraper-qa/internal/utils"
 )
 
 func CheckStatus(repo *blog.Repository, logger *utils.CustomLogger) func(http.ResponseWriter, *http.Request) {

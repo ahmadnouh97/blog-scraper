@@ -3,8 +3,8 @@ package scraper
 import (
 	"strings"
 
-	"github.com/ahmadnouh97/blog-scraper/internal/blog"
-	"github.com/ahmadnouh97/blog-scraper/internal/utils"
+	"github.com/ahmadnouh97/blog-scraper-qa/internal/blog"
+	"github.com/ahmadnouh97/blog-scraper-qa/internal/utils"
 )
 
 func ScrapeDevToBlogs(perPage string, page string, sortBy string, sortDirection string) ([]*DevToData, error) {

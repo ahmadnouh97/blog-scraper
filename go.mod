@@ -1,4 +1,4 @@
-module github.com/ahmadnouh97/blog-scraper
+module github.com/ahmadnouh97/blog-scraper-qa
 
 go 1.23.2
 

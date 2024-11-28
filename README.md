@@ -19,7 +19,7 @@ A simple Golang tool for scraping and storing blog posts. This tool extracts tit
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/blog-scraper.git
+   git clone https://github.com/your-username/blog-scraper-qa.git
    ```
 
 2. Install dependencies:
