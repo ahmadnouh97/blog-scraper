@@ -7,9 +7,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	md "github.com/JohannesKaufmann/html-to-markdown"
-	"github.com/ahmadnouh97/blog-scraper/internal/utils"
 )
 
 type DevToData struct {
@@ -107,24 +104,24 @@ func fetchMetadata(params map[string]string) ([]*DevToData, error) {
 	return devToData, nil
 }
 
-func getBlogMarkdown(path string) (string, error) {
-	url := fmt.Sprintf("https://dev.to%s", path)
+// func getBlogMarkdown(path string) (string, error) {
+// 	url := fmt.Sprintf("https://dev.to%s", path)
 
-	html, error := utils.FetchHTMLPage(url)
+// 	html, error := utils.FetchHTMLPage(url)
 
-	if error != nil {
-		return "", error
-	}
+// 	if error != nil {
+// 		return "", error
+// 	}
 
-	converter := md.NewConverter("", true, nil)
+// 	converter := md.NewConverter("", true, nil)
 
-	markdown, err := converter.ConvertString(html)
-	if err != nil {
-		return "", err
-	}
+// 	markdown, err := converter.ConvertString(html)
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	return markdown, nil
-}
+// 	return markdown, nil
+// }
 
 // func scrapeBlogsContent(devToData []*DevToData) ([]*DevToData, error) {
 // 	for _, blog := range devToData {
