@@ -11,7 +11,9 @@ A simple Golang tool for scraping and storing blog posts. This tool extracts tit
 
 - **Golang**: Core programming language
 - **goose**: For DB Migrations
-- **SQLite3**: For lightweight data storage
+- **SQLite3**: For saving scraped data to sqlite database.
+- **gocron**: For Scheduling Scraping Jobs.
+- **langchaingo**: To Perform QA with LLMs on the Scraped Data.
 
 ## Installation
 
